@@ -1,0 +1,665 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1">
+
+<!-- Bootstrap CSS -->
+      <link rel="stylesheet" href="{% static 'assets/css/bootstrap.min.css' %}">
+      <!-- Font awesome CSS -->
+      <link rel="stylesheet" href="{% static 'assets/fonts/font-awesome-4.7.0/css/font-awesome.min.css' %}">
+      <!-- Custom CSS -->
+      <link href="vendor2/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+      <!-- Custom styles for this template -->
+      <link href="css2/business-frontpage.css" rel="stylesheet">
+      
+      <style media="screen">
+        .invalid {
+          color: #dc3545;
+          font-size: 80%;
+        }
+        body {
+          display: flex;
+          flex-direction: column;
+          min-height: 100vh;
+        }
+        .footer {
+          margin: auto 0 0;
+          height: 56px;
+        }
+      </style>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0/dist/Chart.min.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+      <script src="{% static 'assets/js/utils.js' %}"></script>
+      <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['bar']});
+      google.charts.setOnLoadCallback(drawChart);
+
+      function drawChart() {
+        var data = google.visualization.arrayToDataTable([
+          ['Asistencia', 'Presentes', 'Ausentes'],
+          {% for i in reunion %}
+          ['{{i.fecha_reunion}}', '{{presentes}}', '{{ausentes}}'],
+          {% endfor %}
+        ]);
+
+        var options = {
+          chart: {
+            title: 'Company Performance',
+            subtitle: 'Sales, Expenses, and Profit: 2014-2017',
+          }
+        };
+
+        var chart = new google.charts.Bar(document.getElementById('columnchart_material'));
+
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+      }
+    </script>
+
+
+      {% include "_header.html" %}
+<title>Prototipo v2.0</title>
+  </head>
+  {% include "_modal.html" %}
+<body>
+ {% if not user.is_anonymous and user.is_staff and user.is_superuser%}
+ <div class="container">
+    <a class="navbar-brand"><h2>Horcones 2</h2></a>
+    <div class="area"></div><nav class="main-menu">
+            <ul>
+                <li>
+                    <a href="{% url 'index' %}">
+                        <i class="fa fa-home fa-2x"></i>
+                        <span class="nav-text">
+                            Inicio
+                        </span>
+                    </a>
+                </li>
+                <li>
+                  <a href="{% url 'lista_incidentes' %}">
+                    <i class="fa fa-list fa-2x"></i>
+                    <span class="nav-text">
+                      Lista de Incidentes
+                    </span>
+                </li>
+                <li>
+                  <a href="{% url 'lista_reunion' %}">
+                    <i class="fa fa-list fa-2x"></i>
+                    <span class="nav-text">
+                      Lista Reuniones
+                    </span>
+                </li>
+                <li>
+                  <a href="{% url 'lista_compromisos' %}">
+                    <i class="fa fa-list fa-2x"></i>
+                    <span class="nav-text">
+                      Lista Compromisos
+                    </span>
+                </li>
+                <li>
+                  <a href="{% url 'balancedscorecard' 1 %}">
+                    <i class="fa fa-table fa-2x"></i>
+                    <span class="nav-text">
+                      Indicadores Financieros
+                    </span>
+                </li>
+                <li>
+                  <a href="{% url 'balancedscorecard' 2 %}">
+                    <i class="fa fa-table fa-2x"></i>
+                    <span class="nav-text">
+                      Indicadores Clientes
+                    </span>
+                </li>
+                <li>
+                  <a href="{% url 'balancedscorecard' 3 %}">
+                    <i class="fa fa-table fa-2x"></i>
+                    <span class="nav-text">
+                      Indicadores Procesos internos
+                    </span>
+                </li>
+                <li>
+                  <a href="{% url 'balancedscorecard' 4 %}">
+                    <i class="fa fa-table fa-2x"></i>
+                    <span class="nav-text">
+                      Indicadores Aprendizaje y crecimiento
+                    </span>
+                </li>
+                </ul>
+              <ul class="logout">
+                <li>
+                  <a href="{% url 'reporte_indicadores' %}">
+                    <i class="fa fa-info fa-2x"></i>
+                    <span class="nav-text">
+                      Reporte Indicadores
+                    </span>
+                </li>
+                <li>
+                   <a href="{% url 'logout' %}">
+                         <i class="fa fa-power-off fa-2x"></i>
+                        <span class="nav-text">
+                            Cerrar Sesión
+                        </span>
+                    </a>
+                </li>  
+              </ul>
+            
+        </nav>
+  <div class="container mt-3">
+    <div class="row">
+      <div class="col">
+         
+          <h4>
+            <strong>Reuniones</strong>
+          </h4>
+        </div>
+          <div class="row">
+              <div class="col-md-4 mb-5" style="margin-left: 160px">
+                  <div class="card h-100" style="width:900px">
+                    <canvas id="myChart2" ></canvas>
+                  </div>
+                </div>
+               <canvas id="canvas"></canvas>
+          <div class="col-12 mb-3">
+              <div class="col-12 mb-3">
+                  {% if reunion %}
+                    <table class="table">
+                      <thead>
+                        <tr>
+                            <th class="text-center" scope="col">#</th>
+                            <th class="text-center" scope="col">Fecha</th>
+                            <th class="text-center" scope="col">Presentes</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for i in reunion %}
+                          <tr>
+                            <th class="text-center" scope="row">{{ forloop.counter }}</th>
+                            <td class="text-center">{{ i.fecha_reunion }}</td>
+                            <td>
+                                <ul>
+                                    {% for p in i.participantes.all %}
+                                        <li class="text-center">{{ p.username }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                            <td class="text-center">
+                                    <button type="button" class="update-compromisos btn btn-sm btn-primary" data-id="{% url 'actualizar_reunion' i.pk %}">
+                                    <span class="fa fa-pencil"></span>
+                                    </button>
+                                </td>
+                          </tr>
+                        {% endfor %}
+                      </tbody>
+                    </table>
+                    <td class="text-center">
+                      <a class="btn btn-danger" href="{% url 'index' %}">Volver</a>
+                    </td>
+                  {% else %}
+                    <p class="no-books text-primary">No Existen Registros</p>
+                    <div class="row">
+                        <td class="text-center">
+                          <a class="btn btn-danger" href="{% url 'index' %}">Volver</a>
+                        </td>
+                      </div>
+                  {% endif %}
+                </div>
+            </div>
+          </div>
+        </div>
+            {% else %}
+            {% if not user.is_anonymous and user.is_staff %}
+             <div class="container">
+    <a class="navbar-brand"><h2>Horcones 2</h2></a>
+    <div class="area"></div><nav class="main-menu">
+            <ul>
+                <li>
+                    <a href="{% url 'index' %}">
+                        <i class="fa fa-home fa-2x"></i>
+                        <span class="nav-text">
+                            Inicio
+                        </span>
+                    </a>
+                </li>
+                <li>
+                  <a href="{% url 'lista_incidentes' %}">
+                    <i class="fa fa-list fa-2x"></i>
+                    <span class="nav-text">
+                      Lista de Incidentes
+                    </span>
+                </li>
+                <li>
+                  <a href="{% url 'lista_reunion' %}">
+                    <i class="fa fa-list fa-2x"></i>
+                    <span class="nav-text">
+                      Lista Reuniones
+                    </span>
+                </li>
+                <li>
+                  <a href="{% url 'lista_compromisos' %}">
+                    <i class="fa fa-list fa-2x"></i>
+                    <span class="nav-text">
+                      Lista Compromisos
+                    </span>
+                </li>
+                <li>
+                  <a href="{% url 'balancedscorecard' 1 %}">
+                    <i class="fa fa-table fa-2x"></i>
+                    <span class="nav-text">
+                      Indicadores Financieros
+                    </span>
+                </li>
+                <li>
+                  <a href="{% url 'balancedscorecard' 2 %}">
+                    <i class="fa fa-table fa-2x"></i>
+                    <span class="nav-text">
+                      Indicadores Clientes
+                    </span>
+                </li>
+                <li>
+                  <a href="{% url 'balancedscorecard' 3 %}">
+                    <i class="fa fa-table fa-2x"></i>
+                    <span class="nav-text">
+                      Indicadores Procesos internos
+                    </span>
+                </li>
+                <li>
+                  <a href="{% url 'balancedscorecard' 4 %}">
+                    <i class="fa fa-table fa-2x"></i>
+                    <span class="nav-text">
+                      Indicadores Aprendizaje y crecimiento
+                    </span>
+                </li>
+                </ul>
+              <ul class="logout">
+                <li>
+                  <a href="{% url 'reporte_indicadores' %}">
+                    <i class="fa fa-info fa-2x"></i>
+                    <span class="nav-text">
+                      Reporte Indicadores
+                    </span>
+                </li>
+                <li>
+                   <a href="{% url 'logout' %}">
+                         <i class="fa fa-power-off fa-2x"></i>
+                        <span class="nav-text">
+                            Cerrar Sesión
+                        </span>
+                    </a>
+                </li>  
+              </ul>
+            
+        </nav>
+  <div class="container mt-3">
+    <div class="row">
+      <div class="col">
+          <h4>
+            <strong>Reuniones</strong>
+          </h4>
+        </div>
+        <div class="row">
+          <div class="col-md-4 mb-5" style="margin-left: 160px">
+            <div class="card h-100"  style="width:900px">
+              <canvas id="myChart2"></canvas>
+            </div>
+          </div>
+         <canvas id="canvas"></canvas>
+
+
+          <div class="col-12 mb-3">
+              <div class="col-12 mb-3">
+                {% if reunion %}
+                  <table class="table">
+                    <thead>
+                      <tr>
+                        <th class="text-center" scope="col">#</th>
+                        <th class="text-center" scope="col">Fecha Reunion</th>
+                        <th class="text-center" scope="col">Presentes</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for i in reunion %}
+                        <tr>
+                          <th class="text-center" scope="row">{{ forloop.counter }}</th>
+                          <td class="text-center">{{ i.fecha_reunion }}</td>
+                          <td>
+                            <ul>
+                                {% for p in i.participantes.all %}
+                                    <li class="text-center">{{ p.username }}</li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                  <td class="text-center">
+                    <a class="btn btn-danger" href="{% url 'index' %}">Volver</a>
+                  </td>
+                {% else %}
+                  <p class="no-books text-primary">No Existen Registros</p>
+                  <div class="row">
+                      <td class="text-center">
+                        <a class="btn btn-danger" href="{% url 'index' %}">Volver</a>
+                      </td>
+                    </div>
+                {% endif %}
+              </div>
+          </div>
+        </div>
+      </div>
+          {% else %}
+            <button class="login-btn btn btn-primary" type="button" name="button">Log in</button>
+          {% endif %}
+            {% endif %}
+          </div>
+        </div>
+        {% include "_footer.html" %}
+</body>
+
+  <script type="text/javascript">
+    $(function () {
+      // Log in & Sign up buttons
+      $(".login-btn").modalForm({formURL: "{% url 'login' %}"});
+      $(".signup-btn").modalForm({formURL: "{% url 'registro' %}"});
+
+        // crear informacion kpi
+      $(".info-kpi").each(function () {
+        $(this).modalForm({formURL: $(this).data('id')});
+      });
+
+      // Update book buttons
+      $(".update-compromisos").each(function () {
+        $(this).modalForm({formURL: $(this).data('id')});
+      });
+
+      // Read book buttons
+      $(".detalle-compromisos").each(function () {
+        $(this).modalForm({formURL: $(this).data('id')});
+      });
+
+      // Delete book buttons
+      $(".delete-book").each(function () {
+        $(this).modalForm({formURL: $(this).data('id')});
+      })
+
+      // Hide message
+      $(".alert").fadeTo(2000, 500).slideUp(500, function(){
+        $(".alert").slideUp(500);
+      });
+
+    });
+  </script>
+<style>
+  @import url(//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css);
+  @import url(https://fonts.googleapis.com/css?family=Titillium+Web:300);
+.fa-2x {
+font-size: 2em;
+}
+.fa {
+position: relative;
+display: table-cell;
+width: 60px;
+height: 36px;
+text-align: center;
+vertical-align: middle;
+font-size:20px;
+}
+
+
+.main-menu:hover,nav.main-menu.expanded {
+width:250px;
+overflow:visible;
+}
+
+.main-menu {
+background:#212121;
+border-right:1px solid #e5e5e5;
+position:fixed;
+top:0;
+bottom:0;
+height: auto;
+left:0;
+width:60px;
+overflow:hidden;
+-webkit-transition:width .05s linear;
+transition:width .05s linear;
+-webkit-transform:translateZ(0) scale(1,1);
+z-index:1000;
+}
+
+.main-menu>ul {
+margin:7px 0;
+}
+
+.main-menu li {
+position:relative;
+display:block;
+width:250px;
+}
+
+.main-menu li>a {
+position:relative;
+display:table;
+border-collapse:collapse;
+border-spacing:0;
+color:#999;
+ font-family: arial;
+font-size: 14px;
+text-decoration:none;
+-webkit-transform:translateZ(0) scale(1,1);
+-webkit-transition:all .1s linear;
+transition:all .1s linear;
+  
+}
+
+.main-menu .nav-icon {
+position:relative;
+display:table-cell;
+width:60px;
+height:36px;
+text-align:center;
+vertical-align:middle;
+font-size:18px;
+}
+
+.main-menu .nav-text {
+position:relative;
+display:table-cell;
+vertical-align:middle;
+width:190px;
+  font-family: 'Titillium Web', sans-serif;
+}
+
+.main-menu>ul.logout {
+position:absolute;
+left:0;
+bottom:0;
+}
+
+.no-touch .scrollable.hover {
+overflow-y:hidden;
+}
+
+.no-touch .scrollable.hover:hover {
+overflow-y:auto;
+overflow:visible;
+}
+
+a:hover,a:focus {
+text-decoration:none;
+}
+
+nav {
+-webkit-user-select:none;
+-moz-user-select:none;
+-ms-user-select:none;
+-o-user-select:none;
+user-select:none;
+}
+
+nav ul,nav li {
+outline:0;
+margin:0;
+padding:0;
+}
+.main-menu li:hover>a,nav.main-menu li.active>a,.dropdown-menu>li>a:hover,.dropdown-menu>li>a:focus,.dropdown-menu>.active>a,.dropdown-menu>.active>a:hover,.dropdown-menu>.active>a:focus,.no-touch .dashboard-page nav.dashboard-menu ul li:hover a,.dashboard-page nav.dashboard-menu ul li.active a {
+color:#fff;
+background-color:#5fa2db;
+}
+.area {
+float: left;
+background: #e2e2e2;
+width: 100%;
+height: 100%;
+}
+@font-face {
+  font-family: 'Titillium Web';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Titillium WebLight'), local('TitilliumWeb-Light'), url(http://themes.googleusercontent.com/static/fonts/titilliumweb/v2/anMUvcNT0H1YN4FII8wpr24bNCNEoFTpS2BTjF6FB5E.woff) format('woff');
+}
+  </style>
+
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+      <script src="{% static 'assets/js/jquery-3.2.1.min.js' %}"></script>
+      <script src="{% static 'assets/js/popper.min.js' %}"></script>
+      <script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
+      <script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
+      <script src="vendor2/jquery/jquery.min.js"></script>
+      <script src="vendor2/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+      {% block jquery %} 
+      <script>    
+      var endpoint = '/api/asistencia/'
+      var usuario = []
+      var presente = [];
+      var ausente = []
+      var fecha = ''
+      var porcentaje =[]
+
+      $.ajax({
+          method: "GET",
+          url: endpoint,
+          success: function(data){
+              usuario = data.usuario
+              presente = data.presente
+              ausente = data.ausente
+              fecha = data.fecha
+              porcentaje = data.porcentaje
+              fecha = data.fecha
+              console.log(data)
+              setCharts()
+              
+          },
+          error: function(error_data){
+              console.log('error')
+              console.log(error_data)
+              }
+          })
+      
+      function setCharts(){
+          var ctx2 = document.getElementById('myChart2');
+          var myChart = new Chart(ctx2, {
+              type: 'bar',
+              data: {
+                  labels: usuario,
+                  datasets: [{
+                      label: 'Valores',
+                      data: presente,
+                      backgroundColor: window.chartColors.red,
+                      borderColor: window.chartColors.red,
+                  },
+                  {
+                    label: 'Meta',
+                    data: ausente,
+                    backgroundColor: window.chartColors.green,
+                    borderColor: window.chartColors.green,
+                    fill: false,
+                    borderDash:[5,5]
+                  }]
+              },
+              options: {
+                  scales: {
+                      yAxes: [{
+                          ticks: {
+                              beginAtZero: true
+                          }
+                      }]
+                  }
+              }
+          });
+      
+          var config = {
+			type: 'bar',
+			data: {
+				labels: usuario,
+				datasets: [{
+					label: 'Ausente',
+					backgroundColor: window.chartColors.red,
+					borderColor: window.chartColors.red,
+					data: ausente,
+					fill: true,
+				}, {
+					label: 'Presente',
+					fill: false,
+					backgroundColor: window.chartColors.blue,
+					borderColor: window.chartColors.blue,
+					data: presente,
+        }
+        , {
+					label: '% Asistencia',
+					fill: false,
+					backgroundColor: window.chartColors.green,
+					borderColor: window.chartColors.green,
+          data: porcentaje,
+          hidden:true
+				}]
+			},
+			options: {
+				responsive: true,
+				title: {
+					display: true,
+					text: 'Asistencia Reuniones: '+ fecha
+				},
+				tooltips: {
+					mode: 'index',
+					intersect: false,
+				},
+				hover: {
+					mode: 'nearest',
+					intersect: true
+				},
+				scales: {
+					xAxes: [{
+						display: true,
+						scaleLabel: {
+							display: true,
+              labelString: 'Usuarios',
+						}
+					}],
+					yAxes: [{
+						display: true,
+						scaleLabel: {
+							display: true,
+							labelString: 'Reuniones'
+						}
+					}]
+				}
+			}
+		};
+
+		window.onload = function() {
+			var ctx = document.getElementById('canvas').getContext('2d');
+			window.myLine = new Chart(ctx, config);
+		};
+
+		var colorNames = Object.keys(window.chartColors);
+      }
+      
+      </script>
+  {% endblock %}
